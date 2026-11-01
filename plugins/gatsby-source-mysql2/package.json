@@ -1,0 +1,36 @@
+{
+  "name": "gatsby-source-mysql-next",
+  "version": "1.0.0",
+  "description": "gatsby-source-mysql that works on MySQL 8 / caching_sha2_password, via the actively maintained mysql2 driver.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/node-creation.test.js"
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "mysql",
+    "mysql8",
+    "caching-sha2-password"
+  ],
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "gatsby-node.js",
+    "src/",
+    "package.json"
+  ],
+  "dependencies": {
+    "mysql2": "^3.24.6",
+    "pluralize": "^8.0.0"
+  },
+  "peerDependencies": {
+    "gatsby": ">2.0.0",
+    "gatsby-source-filesystem": ">2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "gatsby-source-filesystem": {
+      "optional": true
+    }
+  }
+}
