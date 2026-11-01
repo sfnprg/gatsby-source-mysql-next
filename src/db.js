@@ -1,6 +1,6 @@
 const mysql = require(`mysql2/promise`);
 
-const PLUGIN_NAME = `[gatsby-source-mysql2]`;
+const PLUGIN_NAME = `[gatsby-source-mysql-next]`;
 
 /**
  * Turn low-level driver errors into an actionable explanation.

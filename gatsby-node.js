@@ -1,7 +1,7 @@
 const queryDb = require(`./src/db`);
 const createMysqlNodes = require(`./src/create-mysql-nodes`);
 
-const PLUGIN_NAME = `[gatsby-source-mysql2]`;
+const PLUGIN_NAME = `[gatsby-source-mysql-next]`;
 
 exports.sourceNodes = async (
   { actions, store, createNodeId, cache, getCache, reporter },

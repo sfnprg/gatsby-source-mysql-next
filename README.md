@@ -22,19 +22,42 @@ Unix socket, and — over a plain TCP connection — the RSA public-key exchange
 to complete the first password check securely. No need to `ALTER USER ... IDENTIFIED WITH
 mysql_native_password` and no need for `default_authentication_plugin` workarounds.
 
-## Migrate from gatsby-source-mysql
-
-In your site root:
+## Installation
 
 ```bash
-# 1. remove the old package from your site's package.json
-npm uninstall gatsby-source-mysql
+npm install gatsby-source-mysql-next
+```
 
-# 2. copy this folder into your site's plugins directory as-is
+or directly from this repository:
+
+```bash
+npm install github:sfnprg/gatsby-source-mysql-next
+```
+
+Then register the plugin in `gatsby-config.js`:
+
+```js
+module.exports = {
+  plugins: [
+    {
+      resolve: `gatsby-source-mysql-next`,
+      options: {
+        // see Configuration below
+      }
+    }
+  ]
+};
+```
+
+To use it as a local plugin instead, copy the contents of this repository into your
+site's `plugins/` directory:
+
+```bash
+git clone https://github.com/sfnprg/gatsby-source-mysql-next.git
 mkdir -p plugins
-cp -r /path/to/this/plugins/gatsby-source-mysql-next plugins/
+cp -r gatsby-source-mysql-next/. plugins/gatsby-source-mysql-next/
 
-# 3. install this plugin's own dependencies inside its folder
+# install this plugin's own dependencies inside its folder
 cd plugins/gatsby-source-mysql-next
 npm install
 cd ../..
@@ -42,6 +65,16 @@ cd ../..
 
 Node resolves `mysql2` from the plugin folder first, so nothing has to be added to the
 site's `package.json`.
+
+## Migrate from gatsby-source-mysql
+
+```bash
+# 1. remove the old package from your site's package.json
+npm uninstall gatsby-source-mysql
+
+# 2. install this one
+npm install gatsby-source-mysql-next   # or: npm install github:sfnprg/gatsby-source-mysql-next
+```
 
 Then change the one line in `gatsby-config.js`:
 
@@ -142,9 +175,20 @@ The MySQL version isn't in the name — the name points at the successor plugin,
 specific MySQL release. MySQL 8's `caching_sha2_password` is the reason this exists, but
 the same mysql2 driver also works fine with MySQL 5.7 and MariaDB.
 
-## Releasing this plugin (maintainer)
+## Development
 
-This package ships only its plugin files. Anything under `test/`, `test-vm/` and
-`artifacts/` is kept out of the published npm package by the `"files"` field in
-`package.json`. Run `npm test` from inside the plugin folder to run the self-contained
-node-creation suite.
+Clone this repository — the plugin package lives at the repository root:
+
+```bash
+git clone https://github.com/sfnprg/gatsby-source-mysql-next.git
+cd gatsby-source-mysql-next
+npm ci
+npm test
+```
+
+`npm test` runs the self-contained node-creation suite in `test/`. The `test/` directory
+is kept out of the published npm package by the `"files"` field in `package.json`.
+
+## License
+
+MIT
