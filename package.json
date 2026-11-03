@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-mysql-next",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "gatsby-source-mysql that works on MySQL 8 / caching_sha2_password, via the actively maintained mysql2 driver.",
   "main": "index.js",
   "scripts": {

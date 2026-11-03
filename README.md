@@ -153,7 +153,9 @@ mysql2 option works (`ssl`, `connectTimeout`, `dateStrings`, `decimalNumbers`, `
 2. **Errors**: connection and query failures now *stop the build* (`reporter.panic`) with an
    actionable message (DNS, refused, access denied, host grant, 1251, TLS-required, TLS
    handshake). The original swallowed query errors with `reporter.error`, leaving you with
-   empty GraphQL data.
+   empty GraphQL data. A failed query is reported once (no duplicated error text), naming
+   the `queries` entry and printing its full SQL statement so the culprit is easy to find
+   in `gatsby-config.js`.
 3. **Node creation inlined**: the old `gatsby-node-helpers@0.3.0` chain (lodash/fp,
    p-is-promise, json-stringify-safe) is replaced by local equivalents that produce
    **identical** node IDs and type names (`mysql__Country__USA`, `MysqlCountry`) and

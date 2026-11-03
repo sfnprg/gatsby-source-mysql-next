@@ -66,21 +66,49 @@ function query(dbConnection, statement, reporter) {
   });
 }
 
+/**
+ * Wrap a failed statement so the panic message names the offending query
+ * (index + configured name) and prints the full SQL, making it easy to
+ * locate in gatsby-config. The original driver error is kept as `cause`.
+ */
+function describeQueryError(err, { statement, name }, index) {
+  const message = err && err.message ? err.message : String(err);
+  const code = err && (err.code || err.errno);
+  const wrapped = new Error(
+    `query #${index}${name ? ` "${name}"` : ``} failed: ${message}${
+      code ? ` (code: ${code})` : ``
+    }\nFailing statement: ${statement}`
+  );
+  if (err && typeof err === `object`) {
+    wrapped.code = code;
+    wrapped.sqlState = err.sqlState;
+    wrapped.cause = err;
+  }
+  return wrapped;
+}
+
 async function queryDb(connectionDetails, queries, reporter) {
   let db;
   try {
     db = await mysql.createConnection(connectionDetails);
   } catch (err) {
+    // Single string argument on purpose: passing the Error as a second
+    // argument makes Gatsby print `message + " " + err.message` in the
+    // structured error AND render the raw error again, so the same text
+    // shows up duplicated (once more with a red background).
     reporter.panic(
-      `${PLUGIN_NAME} Error establishing database connection. ${describeConnectionError(err)}`,
-      err
+      `${PLUGIN_NAME} Error establishing database connection. ${describeConnectionError(err)}`
     );
     return;
   }
 
   try {
     const queryResults = await Promise.all(
-      queries.map(({ statement }) => query(db, statement, reporter))
+      queries.map((queryConfig, index) =>
+        query(db, queryConfig.statement, reporter).catch(queryErr => {
+          throw describeQueryError(queryErr, queryConfig, index);
+        })
+      )
     );
     return {
       db,
@@ -92,9 +120,10 @@ async function queryDb(connectionDetails, queries, reporter) {
     } catch (e) {
       // eslint-disable-line no-empty
     }
+    // Single string argument (see above): it already contains the driver
+    // error, the failing query and its full statement, each exactly once.
     reporter.panic(
-      `${PLUGIN_NAME} Error making queries: ${err && err.message ? err.message : err}`,
-      err
+      `${PLUGIN_NAME} Error making queries: ${err && err.message ? err.message : err}`
     );
   }
 }
