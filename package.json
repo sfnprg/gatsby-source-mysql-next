@@ -24,6 +24,9 @@
     "mysql2": "^3.24.6",
     "pluralize": "^8.0.0"
   },
+  "devDependencies": {
+    "yarn": "^1.22.22"
+  },
   "peerDependencies": {
     "gatsby": ">2.0.0",
     "gatsby-source-filesystem": ">2.0.0"

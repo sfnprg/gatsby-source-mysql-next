@@ -1,5 +1,7 @@
 # gatsby-source-mysql-next
 
+[![npm version](https://img.shields.io/npm/v/gatsby-source-mysql-next)](https://www.npmjs.com/package/gatsby-source-mysql-next)
+
 A source plugin for pulling data into Gatsby from MySQL — a modernized successor to
 [malcolm-kee/gatsby-source-mysql](https://github.com/malcolm-kee/gatsby-source-mysql)
 that runs on the actively maintained [mysql2](https://www.npmjs.com/package/mysql2)
@@ -26,12 +28,16 @@ mysql_native_password` and no need for `default_authentication_plugin` workaroun
 
 ```bash
 npm install gatsby-source-mysql-next
+# or with yarn:
+yarn add gatsby-source-mysql-next
 ```
 
 or directly from this repository:
 
 ```bash
 npm install github:sfnprg/gatsby-source-mysql-next
+# or with yarn:
+yarn add github:sfnprg/gatsby-source-mysql-next
 ```
 
 Then register the plugin in `gatsby-config.js`:
@@ -59,7 +65,7 @@ cp -r gatsby-source-mysql-next/. plugins/gatsby-source-mysql-next/
 
 # install this plugin's own dependencies inside its folder
 cd plugins/gatsby-source-mysql-next
-npm install
+npm install    # or: yarn install
 cd ../..
 ```
 
@@ -70,10 +76,12 @@ site's `package.json`.
 
 ```bash
 # 1. remove the old package from your site's package.json
-npm uninstall gatsby-source-mysql
+npm uninstall gatsby-source-mysql   # or: yarn remove gatsby-source-mysql
 
 # 2. install this one
 npm install gatsby-source-mysql-next   # or: npm install github:sfnprg/gatsby-source-mysql-next
+# or with yarn:
+yarn add gatsby-source-mysql-next      # or: yarn add github:sfnprg/gatsby-source-mysql-next
 ```
 
 Then change the one line in `gatsby-config.js`:
@@ -184,11 +192,11 @@ Clone this repository — the plugin package lives at the repository root:
 ```bash
 git clone https://github.com/sfnprg/gatsby-source-mysql-next.git
 cd gatsby-source-mysql-next
-npm ci
-npm test
+npm ci        # or: yarn install
+npm test      # or: yarn test
 ```
 
-`npm test` runs the self-contained node-creation suite in `test/`. The `test/` directory
+`npm test` (or `yarn test`) runs the self-contained node-creation suite in `test/`. The `test/` directory
 is kept out of the published npm package by the `"files"` field in `package.json`.
 
 ## License
