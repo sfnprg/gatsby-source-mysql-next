@@ -3,6 +3,7 @@
 // Run: node test/node-creation.test.js
 const assert = require(`assert`);
 const createMysqlNodes = require(`../src/create-mysql-nodes`);
+const { buildConnectionOptions } = require(`../src/db`);
 
 function reporterArgs(list) {
   return {
@@ -137,11 +138,29 @@ async function testRemoteImageFieldsWithoutSourceFilesystem() {
   assert.ok(threw, `expected an error when gatsby-source-filesystem is missing`);
 }
 
+function testDriverParityDefaults() {
+  // Defaults reproduce the old `mysql` driver's row values (JSON as string,
+  // DECIMAL as number) so the plugin is a drop-in replacement.
+  const opts = buildConnectionOptions({ host: `db`, user: `u`, password: `p`, database: `d` });
+  assert.strictEqual(opts.jsonStrings, true);
+  assert.strictEqual(opts.decimalNumbers, true);
+  assert.strictEqual(opts.host, `db`);
+  // User-supplied connectionDetails always win over the defaults.
+  const overridden = buildConnectionOptions({ jsonStrings: false, decimalNumbers: false });
+  assert.strictEqual(overridden.jsonStrings, false);
+  assert.strictEqual(overridden.decimalNumbers, false);
+  // The user's object is not mutated.
+  const user = { host: `db` };
+  buildConnectionOptions(user);
+  assert.deepStrictEqual(user, { host: `db` });
+}
+
 (async () => {
   await testGenerateNodeIdShape();
   await testOneToOneManyLinks();
   await testRestrictedFieldsAreRenamed();
   await testRemoteImageFieldsWithoutSourceFilesystem();
+  testDriverParityDefaults();
   console.log(`ok - all node-creation tests passed`);
 })().catch(err => {
   console.error(err);

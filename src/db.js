@@ -3,6 +3,28 @@ const mysql = require(`mysql2/promise`);
 const PLUGIN_NAME = `[gatsby-source-mysql-next]`;
 
 /**
+ * Type-casting defaults that reproduce the row values the old `mysql` driver
+ * (used by gatsby-source-mysql) produced, so this plugin is a drop-in
+ * replacement and existing site code keeps seeing the same field types:
+ *
+ * - `jsonStrings: true`  -> JSON columns come back as raw strings, not parsed
+ *   objects (mysql2 parses JSON by default; the `mysql` driver did not).
+ * - `decimalNumbers: true` -> DECIMAL/NEWDECIMAL come back as numbers
+ *   (mysql2 returns them as strings by default; the `mysql` driver returned
+ *   numbers).
+ *
+ * Any key set in the user's `connectionDetails` wins over these defaults.
+ */
+const DRIVER_PARITY_DEFAULTS = {
+  jsonStrings: true,
+  decimalNumbers: true
+};
+
+function buildConnectionOptions(connectionDetails) {
+  return Object.assign({}, DRIVER_PARITY_DEFAULTS, connectionDetails);
+}
+
+/**
  * Turn low-level driver errors into an actionable explanation.
  * connectionDetails is passed straight through to mysql2, so the errors
  * surfacing at connection time are exactly the ones you would get when
@@ -90,7 +112,7 @@ function describeQueryError(err, { statement, name }, index) {
 async function queryDb(connectionDetails, queries, reporter) {
   let db;
   try {
-    db = await mysql.createConnection(connectionDetails);
+    db = await mysql.createConnection(buildConnectionOptions(connectionDetails));
   } catch (err) {
     // Single string argument on purpose: passing the Error as a second
     // argument makes Gatsby print `message + " " + err.message` in the
@@ -129,3 +151,5 @@ async function queryDb(connectionDetails, queries, reporter) {
 }
 
 module.exports = queryDb;
+module.exports.buildConnectionOptions = buildConnectionOptions;
+module.exports.DRIVER_PARITY_DEFAULTS = DRIVER_PARITY_DEFAULTS;
