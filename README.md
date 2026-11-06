@@ -133,8 +133,48 @@ GraphQL output is unchanged: types `MysqlCountry`, `MysqlCity`, `mysqlImage___NO
 image handling via `remoteImageFieldNames`, stored procedures via `CALL ...`.
 
 `connectionDetails` is passed straight through to `mysql2.createConnection`, so any
-mysql2 option works (`ssl`, `connectTimeout`, `dateStrings`, `decimalNumbers`, `timezone`,
-`multipleStatements`, ...).
+mysql2 option works (`ssl`, `connectTimeout`, `dateStrings`, `timezone`,
+`multipleStatements`, ...). Two type-casting defaults are set for drop-in parity with
+gatsby-source-mysql (see "Row values" below) and can be overridden the same way:
+`jsonStrings` and `decimalNumbers`.
+
+## Supported MySQL versions
+
+The plugin works against **MySQL 5.6, 5.7, 8.0, 8.4 LTS and MariaDB 10.x** — mysql2
+speaks the classic MySQL protocol and implements both `mysql_native_password` (the
+default on 5.6/5.7) and `caching_sha2_password` (the default on 8.x), so the same
+config works on old and new servers. No MySQL-8-only feature is required anywhere in
+the plugin. One caveat: mysql2 connects with the `utf8mb4` charset by default, which
+exists since MySQL 5.5.3 / MariaDB 5.5.3; on anything older pass
+`charset: "UTF8_GENERAL_CI"` in `connectionDetails`.
+
+Note on `GROUP BY`: strict grouping (`ONLY_FULL_GROUP_BY`) is a **server-side
+`sql_mode` setting** (on by default since MySQL 5.7), not something the plugin
+controls — the old gatsby-source-mysql behaves identically against the same server.
+If your queries rely on loose grouping, relax it on the server/session
+(`SET SESSION sql_mode = ...`) or rewrite the query; the plugin cannot do it for you.
+
+## Row values (drop-in parity with gatsby-source-mysql)
+
+The old plugin used the `mysql` driver, whose default type casting returns **JSON
+columns as raw strings** and **DECIMAL/NEWDECIMAL as numbers**. mysql2 defaults to
+the opposite (parsed JSON objects, DECIMAL as strings), which silently changes the
+GraphQL field types of your nodes and can break site code written against the old
+plugin — e.g. a lunr search index built from these fields crashing at query time with
+`can't access property "_index", posting is undefined` in `lunr.Index.prototype.query`,
+because object values tokenize differently than the strings the old plugin produced.
+
+To keep the old behaviour, this plugin sets `jsonStrings: true` and
+`decimalNumbers: true` by default (user-supplied `connectionDetails` win). If you
+*want* mysql2's modern behaviour, opt out explicitly:
+
+```js
+connectionDetails: {
+  // ...
+  jsonStrings: false,    // parse JSON columns into objects
+  decimalNumbers: false  // keep DECIMAL as string (exact precision)
+}
+```
 
 ## Remote server / MySQL 8 notes
 
@@ -180,10 +220,15 @@ mysql2 option works (`ssl`, `connectTimeout`, `dateStrings`, `decimalNumbers`, `
 7. **Unchanged upstream behaviour worth knowing**: if a row has a column literally named
    `id`, it is overwritten by the `idFieldName` value during the parent/child mapping (same
    as upstream), so that column's content is not exposed.
+8. **Row type-casting parity**: `jsonStrings: true` and `decimalNumbers: true` are set by
+   default so rows come back exactly like the old `mysql` driver returned them (JSON as
+   string, DECIMAL as number). Override either in `connectionDetails` if you prefer
+   mysql2's defaults.
 
 The MySQL version isn't in the name — the name points at the successor plugin, not at a
 specific MySQL release. MySQL 8's `caching_sha2_password` is the reason this exists, but
-the same mysql2 driver also works fine with MySQL 5.7 and MariaDB.
+the same mysql2 driver also works fine with MySQL 5.6/5.7 and MariaDB (see "Supported
+MySQL versions" above).
 
 ## Development
 
